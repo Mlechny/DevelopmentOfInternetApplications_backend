@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{.title}}</title>
+	<link href="/styles/card-container.css" rel="stylesheet" type="text/css">
+	<link href="/styles/sliding-button.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<h1>{{.title}}</h1>
+	<form action="/" method="get">
+    		<input type="text" name="filter" value="{{.filter}}" placeholder="Фильтр">
+    		<select name="field">
+    			<option value="Name">По языку программирования</option>
+    			<option value="Subject">По названию предмета</option>
+    		</select>
+    		<button class="sliding-button" type="submit">Поиск</button>
+    	</form>
+	<div class="card-container">
+		{{range $index, $code := .codes}}
+			<div class="card-container__card">
+				<div class="card-container__img">
+					<img src="../images/{{$code.Image}}" alt="{{$code.Name}}">
+				</div>
+				<div class="card-container__name">
+					<h3>{{$code.Name}}</h3>
+				</div>
+				<div class="card-container__subject">
+					<p>Предмет: {{$code.Subject}}</p>
+				</div>
+				<a href="/code/{{$index}}">
+				<button class="sliding-button">Подробнее</button>
+				</a>
+			</div>
+		{{end}}
+	</div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+body{
+    background: url("https://fons.pibig.info/uploads/posts/2023-05/1685496584_fons-pibig-info-p-fon-neon-gorod-vkontakte-1.jpg");
+}
+
+h1 {
+    color: #000000;
+    font-size: 30px;
+    font-family: Gill Sans, sans-serif;
+}
+
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.card-container__card {
+    flex-basis: 30%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px;
+    width: 350px;
+    box-sizing: border-box;
+    background: linear-gradient(to bottom right, blue, pink);
+}
+
+.card-container__img > img{
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.card-container__name > h3 {
+    margin-top: 10px;
+    font-family: Gill Sans, sans-serif;
+    font-weight: bold;
+    text-shadow: #d900ff 1px 0 10px;
+}
+
+.card-container__subject > p {
+    margin-bottom: 10px;
+    font-family: Gill Sans, sans-serif;
+    font-weight: 600;
+}
+
+input[type="text"][name="filter"]::placeholder,
+select[name="field"]::placeholder {
+    color: #6f1bec;
+}
