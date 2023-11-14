@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="/styles/sliding-button.css" rel="stylesheet" type="text/css">
+	<link href="/styles/code.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<h1>Подробная информация</h1>
+	<div class="code">
+	    <div class="code__image">
+	     <img src="{{.ImageURL}}" alt="" />
+	    </div>
+	<div class="code__info">
+		<h3>{{.Name}}</h3>
+		<div class="code__desk">
+		<p>Предмет: {{.Subject}}</p>
+		</div>
+		<div class="code__task">
+		<p>Задание: {{.Task}}</p>
+		</div>
+		<div class="code__desc">
+		<p>Условие: {{.Description}}</p>
+		</div>
+		<a href="/languages">
+        <button class="sliding-button">Домой</button>
+        </a>
+		<div>
+		{{if .IsDeleted}}
+          <b style = "color:#ff0000">Язык программирования удален</b>
+          {{end}}
+        </div>
+	</div>
+	</div>
+</body>
+</html>
