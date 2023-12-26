@@ -1,0 +1,480 @@
+definitions:
+  app.SwaggerUpdateFormRequest:
+    properties:
+      comments:
+        description: изменить
+        type: string
+    type: object
+  ds.Language:
+    properties:
+      description:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+      subject:
+        type: string
+      task:
+        type: string
+      uuid:
+        type: string
+    required:
+    - description
+    - name
+    - subject
+    - task
+    type: object
+  schemes.AddToFormResp:
+    properties:
+      language_count:
+        type: integer
+    type: object
+  schemes.AllFormsResponse:
+    properties:
+      forms:
+        items:
+          $ref: '#/definitions/schemes.FormOutput'
+        type: array
+    type: object
+  schemes.AllLanguagesResponse:
+    properties:
+      languages:
+        items:
+          $ref: '#/definitions/ds.Language'
+        type: array
+    type: object
+  schemes.FormOutput:
+    properties:
+      comments:
+        type: string
+      completion_date:
+        type: string
+      creation_date:
+        type: string
+      formation_date:
+        type: string
+      moderator:
+        type: string
+      sending_status:
+        type: string
+      status:
+        type: string
+      student:
+        type: string
+      uuid:
+        type: string
+    type: object
+  schemes.FormResponse:
+    properties:
+      form:
+        $ref: '#/definitions/schemes.FormOutput'
+      languages:
+        items:
+          $ref: '#/definitions/ds.Language'
+        type: array
+    type: object
+  schemes.FormShort:
+    properties:
+      language_count:
+        type: integer
+      uuid:
+        type: string
+    type: object
+  schemes.GetAllLanguagesResponse:
+    properties:
+      draft_form:
+        $ref: '#/definitions/schemes.FormShort'
+      languages:
+        items:
+          $ref: '#/definitions/ds.Language'
+        type: array
+    type: object
+  schemes.LoginReq:
+    properties:
+      login:
+        maxLength: 30
+        type: string
+      password:
+        maxLength: 30
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  schemes.RegisterReq:
+    properties:
+      login:
+        maxLength: 30
+        type: string
+      password:
+        maxLength: 30
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  schemes.RegisterResp:
+    properties:
+      ok:
+        type: boolean
+    type: object
+  schemes.SwaggerLoginResp:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+    type: object
+  schemes.UpdateFormResponse:
+    properties:
+      forms:
+        $ref: '#/definitions/schemes.FormOutput'
+    type: object
+info:
+  contact: {}
+paths:
+  /api/forms:
+    get:
+      description: Возвращает все формы с фильтрацией по статусу и дате формирования
+      parameters:
+      - description: статус формы
+        in: query
+        name: status
+        type: string
+      - description: начальная дата формирования
+        in: query
+        name: formation_date_start
+        type: string
+      - description: конечная дата формирвания
+        in: query
+        name: formation_date_end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.AllFormsResponse'
+      summary: Получить все формы
+      tags:
+      - Формы
+  /api/forms/{form_id}:
+    delete:
+      description: Удаляет форму по id
+      parameters:
+      - description: id формы
+        in: path
+        name: form_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Удалить форму
+      tags:
+      - Формы
+    put:
+      description: Позволяет изменить комментарий по коду и возвращает обновлённые
+        данные
+      parameters:
+      - description: id формы
+        in: path
+        name: form_id
+        required: true
+        type: string
+      - description: Комментарий
+        in: body
+        name: comments
+        required: true
+        schema:
+          $ref: '#/definitions/app.SwaggerUpdateFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.UpdateFormResponse'
+      summary: Указать комментарий к форме
+      tags:
+      - Формы
+  /api/forms/{form_id}/delete_language/{language_id}:
+    delete:
+      description: Удалить язык программиования из формы
+      parameters:
+      - description: id формы
+        in: path
+        name: from_id
+        required: true
+        type: string
+      - description: id языка программирования
+        in: path
+        name: language_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.AllLanguagesResponse'
+      summary: Удалить язык программирования из формы
+      tags:
+      - Формы
+  /api/forms/{form_id}/moderator_confirm:
+    put:
+      description: Подтвердить или отменить форму модератором
+      parameters:
+      - description: id формы
+        in: path
+        name: form_id
+        required: true
+        type: string
+      - description: подтвердить
+        in: body
+        name: confirm
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+      summary: Подтвердить/отклонить форму
+      tags:
+      - Формы
+  /api/forms/{from_id}:
+    get:
+      description: Возвращает подробную информацию о форме и комментарий по коду
+      parameters:
+      - description: id формы
+        in: path
+        name: form_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.FormResponse'
+      summary: Получить одну форму
+      tags:
+      - Формы
+  /api/forms/user_confirm:
+    put:
+      description: Сформировать или удалить форму пользователем
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.FormOutput'
+      summary: Сформировать форму
+      tags:
+      - Формы
+  /api/languages:
+    get:
+      description: Возвращает все доступные языки программирования с опциональной
+        фильтрацией по названию
+      parameters:
+      - description: Название для фильтрации
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.GetAllLanguagesResponse'
+      summary: Получить все языки программирования
+      tags:
+      - Языки программирования
+    post:
+      consumes:
+      - multipart/form-data
+      description: Добавить новый язык программирования
+      parameters:
+      - description: Изображение
+        in: formData
+        name: image
+        type: file
+      - description: Название
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Предмет
+        in: formData
+        name: subject
+        required: true
+        type: string
+      - description: Задание
+        in: formData
+        name: task
+        required: true
+        type: integer
+      - description: Описание задания
+        in: formData
+        name: description
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Добавить язык программирования
+      tags:
+      - Языки программирования
+  /api/languages/{id}:
+    delete:
+      description: Удаляет язык программирования по id
+      parameters:
+      - description: id языка программирования
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Удалить язык программирования
+      tags:
+      - Языки программирования
+    get:
+      description: Возвращает более подробную информацию об одном языке программирования
+      parameters:
+      - description: id языка программирования
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.Language'
+      summary: Получить один язык программирования
+      tags:
+      - Языки программирования
+    put:
+      consumes:
+      - multipart/form-data
+      description: Изменить данные полей об языке программирования
+      parameters:
+      - description: Идентификатор языка программирования
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Название
+        in: formData
+        name: name
+        type: string
+      - description: Предмет
+        in: formData
+        name: subject
+        type: string
+      - description: Задание
+        in: formData
+        name: task
+        type: integer
+      - description: Изображение
+        in: formData
+        name: image
+        type: file
+      - description: Описание задания
+        in: formData
+        name: description
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Изменить язык программирования
+      tags:
+      - Языки программирования
+  /api/languages/{id}/add_to_form:
+    post:
+      description: Добавить выбранный язык программирования в черновик формы
+      parameters:
+      - description: id языка программирования
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.AddToFormResp'
+      summary: Добавить в форму
+      tags:
+      - Языки программирования
+  /api/user/login:
+    post:
+      consumes:
+      - application/json
+      description: Авторизует пользователя по логиню, паролю и отдаёт jwt токен для
+        дальнейших запросов
+      parameters:
+      - description: login and password
+        in: body
+        name: user_credentials
+        required: true
+        schema:
+          $ref: '#/definitions/schemes.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.SwaggerLoginResp'
+      summary: Авторизация
+      tags:
+      - Авторизация
+  /api/user/logout:
+    post:
+      consumes:
+      - application/json
+      description: Выход из аккаунта
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Выйти из аккаунта
+      tags:
+      - Авторизация
+  /api/user/sign_up:
+    post:
+      consumes:
+      - application/json
+      description: Регистрация нового пользователя
+      parameters:
+      - description: login and password
+        in: body
+        name: user_credentials
+        required: true
+        schema:
+          $ref: '#/definitions/schemes.RegisterReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.RegisterResp'
+      summary: Регистрация
+      tags:
+      - Авторизация
+swagger: "2.0"

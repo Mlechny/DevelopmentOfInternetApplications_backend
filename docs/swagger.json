@@ -1,0 +1,725 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/forms": {
+            "get": {
+                "description": "Возвращает все формы с фильтрацией по статусу и дате формирования",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Получить все формы",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "статус формы",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "начальная дата формирования",
+                        "name": "formation_date_start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "конечная дата формирвания",
+                        "name": "formation_date_end",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.AllFormsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/forms/user_confirm": {
+            "put": {
+                "description": "Сформировать или удалить форму пользователем",
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Сформировать форму",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.FormOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/forms/{form_id}": {
+            "put": {
+                "description": "Позволяет изменить комментарий по коду и возвращает обновлённые данные",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Указать комментарий к форме",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id формы",
+                        "name": "form_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Комментарий",
+                        "name": "comments",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/app.SwaggerUpdateFormRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.UpdateFormResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет форму по id",
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Удалить форму",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id формы",
+                        "name": "form_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/forms/{form_id}/delete_language/{language_id}": {
+            "delete": {
+                "description": "Удалить язык программиования из формы",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Удалить язык программирования из формы",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id формы",
+                        "name": "from_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id языка программирования",
+                        "name": "language_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.AllLanguagesResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/forms/{form_id}/moderator_confirm": {
+            "put": {
+                "description": "Подтвердить или отменить форму модератором",
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Подтвердить/отклонить форму",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id формы",
+                        "name": "form_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "подтвердить",
+                        "name": "confirm",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/forms/{from_id}": {
+            "get": {
+                "description": "Возвращает подробную информацию о форме и комментарий по коду",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Получить одну форму",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id формы",
+                        "name": "form_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.FormResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/languages": {
+            "get": {
+                "description": "Возвращает все доступные языки программирования с опциональной фильтрацией по названию",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Языки программирования"
+                ],
+                "summary": "Получить все языки программирования",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Название для фильтрации",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.GetAllLanguagesResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Добавить новый язык программирования",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "Языки программирования"
+                ],
+                "summary": "Добавить язык программирования",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Изображение",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Название",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Предмет",
+                        "name": "subject",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Задание",
+                        "name": "task",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Описание задания",
+                        "name": "description",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/languages/{id}": {
+            "get": {
+                "description": "Возвращает более подробную информацию об одном языке программирования",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Языки программирования"
+                ],
+                "summary": "Получить один язык программирования",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id языка программирования",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ds.Language"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Изменить данные полей об языке программирования",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Языки программирования"
+                ],
+                "summary": "Изменить язык программирования",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор языка программирования",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Название",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Предмет",
+                        "name": "subject",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Задание",
+                        "name": "task",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Изображение",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Описание задания",
+                        "name": "description",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "description": "Удаляет язык программирования по id",
+                "tags": [
+                    "Языки программирования"
+                ],
+                "summary": "Удалить язык программирования",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id языка программирования",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/languages/{id}/add_to_form": {
+            "post": {
+                "description": "Добавить выбранный язык программирования в черновик формы",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Языки программирования"
+                ],
+                "summary": "Добавить в форму",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id языка программирования",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.AddToFormResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/login": {
+            "post": {
+                "description": "Авторизует пользователя по логиню, паролю и отдаёт jwt токен для дальнейших запросов",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Авторизация"
+                ],
+                "summary": "Авторизация",
+                "parameters": [
+                    {
+                        "description": "login and password",
+                        "name": "user_credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemes.LoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.SwaggerLoginResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/logout": {
+            "post": {
+                "description": "Выход из аккаунта",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Авторизация"
+                ],
+                "summary": "Выйти из аккаунта",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/user/sign_up": {
+            "post": {
+                "description": "Регистрация нового пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Авторизация"
+                ],
+                "summary": "Регистрация",
+                "parameters": [
+                    {
+                        "description": "login and password",
+                        "name": "user_credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemes.RegisterReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.RegisterResp"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "app.SwaggerUpdateFormRequest": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "description": "изменить",
+                    "type": "string"
+                }
+            }
+        },
+        "ds.Language": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "subject",
+                "task"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemes.AddToFormResp": {
+            "type": "object",
+            "properties": {
+                "language_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "schemes.AllFormsResponse": {
+            "type": "object",
+            "properties": {
+                "forms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schemes.FormOutput"
+                    }
+                }
+            }
+        },
+        "schemes.AllLanguagesResponse": {
+            "type": "object",
+            "properties": {
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ds.Language"
+                    }
+                }
+            }
+        },
+        "schemes.FormOutput": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "string"
+                },
+                "completion_date": {
+                    "type": "string"
+                },
+                "creation_date": {
+                    "type": "string"
+                },
+                "formation_date": {
+                    "type": "string"
+                },
+                "moderator": {
+                    "type": "string"
+                },
+                "sending_status": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "student": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemes.FormResponse": {
+            "type": "object",
+            "properties": {
+                "form": {
+                    "$ref": "#/definitions/schemes.FormOutput"
+                },
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ds.Language"
+                    }
+                }
+            }
+        },
+        "schemes.FormShort": {
+            "type": "object",
+            "properties": {
+                "language_count": {
+                    "type": "integer"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemes.GetAllLanguagesResponse": {
+            "type": "object",
+            "properties": {
+                "draft_form": {
+                    "$ref": "#/definitions/schemes.FormShort"
+                },
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ds.Language"
+                    }
+                }
+            }
+        },
+        "schemes.LoginReq": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "maxLength": 30
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 30
+                }
+            }
+        },
+        "schemes.RegisterReq": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "maxLength": 30
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 30
+                }
+            }
+        },
+        "schemes.RegisterResp": {
+            "type": "object",
+            "properties": {
+                "ok": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "schemes.SwaggerLoginResp": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "token_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemes.UpdateFormResponse": {
+            "type": "object",
+            "properties": {
+                "forms": {
+                    "$ref": "#/definitions/schemes.FormOutput"
+                }
+            }
+        }
+    }
+}
