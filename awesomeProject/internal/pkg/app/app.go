@@ -73,7 +73,7 @@ func (a *Application) Run() {
 
 	r.Static("/images", "./resources")
 	r.Static("/styles", "./templates/css")
-	err := r.Run("localhost:8080")
+	err := r.Run("127.0.0.1:8080")
 	if err != nil {
 		return
 	}
