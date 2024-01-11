@@ -439,16 +439,57 @@ func (app *Application) ModeratorConfirm(c *gin.Context) {
 		c.AbortWithError(http.StatusMethodNotAllowed, fmt.Errorf("нельзя изменить статус с \"%s\" на \"%s\"", form.Status, request.Status))
 		return
 	}
-	form.Status = request.Status
 	form.ModeratorId = app.getModerator()
-	if request.Status == ds.COMPLETED {
-		now := time.Now()
-		form.CompletionDate = &now
+
+	if *request.Confirm {
+		form.Status = ds.StatusCompleted
+	} else {
+		form.Status = ds.StatusRejected
 	}
+	now := time.Now()
+	form.CompletionDate = &now
 
 	if err := app.repo.SaveForm(form); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func (app *Application) ChangeGithub(c *gin.Context) {
+	var request schemes.ChangeGithubRequest
+
+	if err := c.ShouldBindUri(&request); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	if err := c.ShouldBind(&request); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	code, err := app.repo.GetCodeByFormId(request.FormId)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	form, err := app.repo.GetFormById(code.FormId, nil)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if form == nil {
+		c.AbortWithError(http.StatusNotFound, fmt.Errorf("форма не найдена"))
+		return
+	}
+
+	code.Github = &request.Github
+
+	if err := app.repo.SaveCode(code); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, schemes.CodeResponse{Code: schemes.ConvertCode(code)})
 }

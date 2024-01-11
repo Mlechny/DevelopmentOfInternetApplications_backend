@@ -39,7 +39,7 @@ type FormOutput struct {
 	CompletionDate *string `json:"completion_date"`
 	Moderator      *string `json:"moderator"`
 	Student        string  `json:"student"`
-	Comments       string  `json:"comments"`
+	Comments       *string  `json:"comments"`
 }
 
 func ConvertForm(form *ds.Form) FormOutput {
@@ -48,7 +48,7 @@ func ConvertForm(form *ds.Form) FormOutput {
 		Status:       form.Status,
 		CreationDate: form.CreationDate.Format("2006-01-02 15:04:05"),
 		Comments:     form.Comments,
-		Student:      form.Student.FIO,
+		Student:      form.Student.Name,
 	}
 
 	if form.FormationDate != nil {
@@ -62,8 +62,28 @@ func ConvertForm(form *ds.Form) FormOutput {
 	}
 
 	if form.Moderator != nil {
-		output.Moderator = &form.Moderator.FIO
+		output.Moderator = &form.Moderator.Name
 	}
 
 	return output
 }
+
+type CodeResponse struct {
+	Code CodeOutput `json:"code"`
+}
+
+type CodeOutput struct {
+	LanguageId string  `json:"language_id"`
+	FormId     string  `json:"form_id"`
+	Github     *string `json:"github"`
+}
+
+func ConvertCode(code *ds.Code) CodeOutput {
+	output := CodeOutput{
+		LanguageId: code.LanguageId,
+		FormId:     code.FormId,
+		Github:     code.Github,
+	}
+	return output
+}
+

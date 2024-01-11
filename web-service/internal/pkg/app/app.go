@@ -44,7 +44,7 @@ func (app *Application) Run() {
 
 	r.Static("/image", "./resources")
 	r.Static("/css", "./templates/css")
-	err := r.Run("localhost:7000")
+	err := r.Run("127.0.0.1:8080")
 	if err != nil {
 		return
 	}
@@ -53,7 +53,7 @@ func (app *Application) Run() {
 
 func New() (*Application, error) {
 	var err error
-	loc, _ := time.LoadLocation("UTC")
+	loc, _ := time.LoadLocation("Europe/Moscow")
 	time.Local = loc
 	app := Application{}
 	app.config, err = config.NewConfig()

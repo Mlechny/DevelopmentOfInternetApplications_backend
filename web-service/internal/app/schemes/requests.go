@@ -65,3 +65,8 @@ type ModeratorConfirmRequest struct {
 	}
 	Status string `form:"status" json:"status" binding:"required"`
 }
+
+type ChangeGithubRequest struct {
+	FormId string `uri:"form_id" binding:"required,uuid"`
+	Github string `form:"github" json:"github" binding:"required,max=50"`
+}
