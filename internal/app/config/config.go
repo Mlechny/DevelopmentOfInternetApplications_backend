@@ -53,7 +53,6 @@ const (
 	envRedisPass = "REDIS_PASSWORD"
 )
 
-// NewConfig Создаёт новый объект конфигурации, загружая данные из файла конфигурации
 func NewConfig() (*Config, error) {
 	var err error
 

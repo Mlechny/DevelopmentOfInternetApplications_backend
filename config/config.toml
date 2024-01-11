@@ -3,12 +3,12 @@ ServicePort = 8080
 Token = "secret_token"
 
 [minio]
-Endpoint = "0.0.0.0:9000"
+Endpoint = "localhost:9000"
 BucketName = "images"
 
 [jwt]
 Token = "drake"
-ExpiresIn = "1h"
+ExpiresIn = "24h"
 
 [Redis]
 DialTimeout = "10s"

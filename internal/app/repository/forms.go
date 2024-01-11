@@ -112,3 +112,20 @@ func (r *Repository) CountLanguages(formId string) (int64, error) {
 	}
 	return count, nil
 }
+
+func (r *Repository) GetCodeByFormId(formId string) (*ds.Code, error) {
+	var code ds.Code
+	err := r.db.Where("form_id = ?", formId).First(&code).Error
+	if err != nil {
+		return nil, err
+	}
+	return &code, nil
+}
+
+func (r *Repository) SaveCode(code *ds.Code) error {
+	err := r.db.Save(code).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

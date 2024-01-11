@@ -1,7 +1,6 @@
 package schemes
 
 import (
-	"time"
 	"web-service/internal/app/ds"
 )
 
@@ -9,13 +8,8 @@ type AllLanguagesResponse struct {
 	Languages []ds.Language `json:"languages"`
 }
 
-type FormShort struct {
-	UUID          string `json:"uuid"`
-	LanguageCount int    `json:"language_count"`
-}
-
 type GetAllLanguagesResponse struct {
-	DraftForm *FormShort    `json:"draft_form"`
+	DraftForm *string       `json:"draft_form"`
 	Languages []ds.Language `json:"languages"`
 }
 
@@ -32,6 +26,25 @@ type UpdateFormResponse struct {
 	Form FormOutput `json:"forms"`
 }
 
+type CodeResponse struct {
+	Code CodeOutput `json:"code"`
+}
+
+type CodeOutput struct {
+	LanguageId string  `json:"language_id"`
+	FormId     string  `json:"form_id"`
+	Github     *string `json:"github"`
+}
+
+func ConvertCode(code *ds.Code) CodeOutput {
+	output := CodeOutput{
+		LanguageId: code.LanguageId,
+		FormId:     code.FormId,
+		Github:     code.Github,
+	}
+	return output
+}
+
 type FormOutput struct {
 	UUID           string  `json:"uuid"`
 	Status         string  `json:"status"`
@@ -41,7 +54,7 @@ type FormOutput struct {
 	Moderator      *string `json:"moderator"`
 	Student        string  `json:"student"`
 	Comments       *string `json:"comments"`
-	SendingStatus  *string `json:"sending_status"`
+	Autotest       *string `json:"autotest"`
 }
 
 func ConvertForm(form *ds.Form) FormOutput {
@@ -51,6 +64,7 @@ func ConvertForm(form *ds.Form) FormOutput {
 		CreationDate: form.CreationDate.Format("2006-01-02 15:04:05"),
 		Comments:     form.Comments,
 		Student:      form.Student.Login,
+		Autotest:     form.Autotest,
 	}
 
 	if form.FormationDate != nil {
@@ -74,18 +88,7 @@ type AddToFormResp struct {
 	LanguagesCount int64 `json:"language_count"`
 }
 
-type LoginResp struct {
-	ExpiresIn   time.Duration `json:"expires_in"`
-	AccessToken string        `json:"access_token"`
-	TokenType   string        `json:"token_type"`
-}
-
-type SwaggerLoginResp struct {
-	ExpiresIn   int64  `json:"expires_in"`
+type AuthResp struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
-}
-
-type RegisterResp struct {
-	Ok bool `json:"ok"`
 }

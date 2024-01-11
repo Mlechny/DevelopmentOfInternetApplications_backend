@@ -15,12 +15,11 @@ import (
 )
 
 // @Summary		Регистрация
-// @Tags		Авторизация
+// @Tags		Авторизация и аутентификация
 // @Description	Регистрация нового пользователя
 // @Accept		json
-// @Produce		json
 // @Param		user_credentials body schemes.RegisterReq true "login and password"
-// @Success		200 {object} schemes.RegisterResp
+// @Success		200
 // @Router		/api/user/sign_up [post]
 func (app *Application) Register(c *gin.Context) {
 	request := &schemes.RegisterReq{}
@@ -29,39 +28,38 @@ func (app *Application) Register(c *gin.Context) {
 		return
 	}
 
-	if request.Password == "" {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("password is empty"))
+	existing_user, err := app.repo.GetUserByLogin(request.Login)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if existing_user != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	if request.Login == "" {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("login is empty"))
-		return
-	}
-
-	if err := app.repo.AddUser(&ds.User{
+	user := ds.User{
 		Role:     role.Student,
 		Login:    request.Login,
 		Password: generateHashString(request.Password),
-	}); err != nil {
+	}
+	if err := app.repo.AddUser(&user); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, &schemes.RegisterResp{
-		Ok: true,
-	})
+	c.Status(http.StatusOK)
 }
 
 // @Summary		Авторизация
-// @Tags		Авторизация
+// @Tags		Авторизация и аутентификация
 // @Description	Авторизует пользователя по логиню, паролю и отдаёт jwt токен для дальнейших запросов
 // @Accept		json
 // @Produce		json
 // @Param		user_credentials body schemes.LoginReq true "login and password"
-// @Success		200 {object} schemes.SwaggerLoginResp
+// @Success		200 {object} schemes.AuthResp
 // @Router		/api/user/login [post]
-// @Consumes    json
+// @Consumes     json
 func (app *Application) Login(c *gin.Context) {
 	JWTConfig := app.config.JWT
 	request := &schemes.LoginReq{}
@@ -75,20 +73,18 @@ func (app *Application) Login(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-
 	if user.Password != generateHashString(request.Password) {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
 	token := jwt.NewWithClaims(JWTConfig.SigningMethod, &ds.JWTClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(JWTConfig.ExpiresIn).Unix(),
 			IssuedAt:  time.Now().Unix(),
-			Issuer:    "bitop-admin",
 		},
 		UserUUID: user.UUID,
 		Role:     user.Role,
+		Login:    user.Login,
 	})
 	if token == nil {
 		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("token is nil"))
@@ -101,24 +97,22 @@ func (app *Application) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, schemes.LoginResp{
-		ExpiresIn:   JWTConfig.ExpiresIn,
+	c.JSON(http.StatusOK, schemes.AuthResp{
 		AccessToken: strToken,
 		TokenType:   "Bearer",
 	})
 }
 
-// @Summary		Выйти из аккаунта
-// @Tags		Авторизация
-// @Description	Выход из аккаунта
+// @Summary		Выход из аккаунта
+// @Tags		Авторизация и аутентификация
+// @Description	Осуществляет выход из аккаунта
 // @Accept		json
-// @Produce		json
 // @Success		200
-// @Router		/api/user/logout [post]
+// @Router		/api/user/loguot [get]
 func (app *Application) Logout(c *gin.Context) {
 	jwtStr := c.GetHeader("Authorization")
 	if !strings.HasPrefix(jwtStr, jwtPrefix) {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.AbortWithError(http.StatusBadRequest, fmt.Errorf(jwtStr))
 		return
 	}
 

@@ -53,73 +53,58 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/api/forms/user_confirm": {
+            },
             "put": {
-                "description": "Сформировать или удалить форму пользователем",
+                "description": "Позволяет изменить комментарий в черновой форме и возвращает обновлённые данные",
                 "tags": [
                     "Формы"
                 ],
-                "summary": "Сформировать форму",
+                "summary": "Указать комментарий в форме",
+                "parameters": [
+                    {
+                        "description": "Комментарии",
+                        "name": "comments",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemes.UpdateFormRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/schemes.FormOutput"
-                        }
+                        "description": "OK"
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет черновую форму",
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Удалить черновую форму",
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
         },
-        "/api/forms/{form_id}": {
-            "put": {
-                "description": "Позволяет изменить комментарий по коду и возвращает обновлённые данные",
+        "/api/forms/delete_language/{id}": {
+            "delete": {
+                "description": "Удалить язык программиования из черновой формы",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Формы"
                 ],
-                "summary": "Указать комментарий к форме",
+                "summary": "Удалить язык программирования из черновой формы",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id формы",
-                        "name": "form_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Комментарий",
-                        "name": "comments",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/app.SwaggerUpdateFormRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/schemes.UpdateFormResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Удаляет форму по id",
-                "tags": [
-                    "Формы"
-                ],
-                "summary": "Удалить форму",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id формы",
-                        "name": "form_id",
+                        "description": "id языка программирования",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -131,28 +116,35 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/forms/{form_id}/delete_language/{language_id}": {
-            "delete": {
-                "description": "Удалить язык программиования из формы",
+        "/api/forms/user_confirm": {
+            "put": {
+                "description": "Сформировать или удалить форму пользователем",
+                "tags": [
+                    "Формы"
+                ],
+                "summary": "Сформировать форму",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/forms/{id}": {
+            "get": {
+                "description": "Возвращает подробную информацию о форме и комментарий",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Формы"
                 ],
-                "summary": "Удалить язык программирования из формы",
+                "summary": "Получить одну форму",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "id формы",
-                        "name": "from_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "id языка программирования",
-                        "name": "language_id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -161,15 +153,53 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/schemes.AllLanguagesResponse"
+                            "$ref": "#/definitions/schemes.FormResponse"
                         }
                     }
                 }
             }
         },
-        "/api/forms/{form_id}/moderator_confirm": {
+        "/api/forms/{id}/change_github": {
             "put": {
-                "description": "Подтвердить или отменить форму модератором",
+                "description": "Позволяет изменить ссылку на гитхаб в таблице м-м и возвращает обновленные данные",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Коды"
+                ],
+                "summary": "Указать ссылку на гитхаб",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id формы",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Гитхаб",
+                        "name": "github",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemes.ChangeGithubRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemes.CodeResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/forms/{id}/moderator_confirm": {
+            "put": {
+                "description": "Подтвердить или отклонить форму модератором",
                 "tags": [
                     "Формы"
                 ],
@@ -178,7 +208,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "id формы",
-                        "name": "form_id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -195,35 +225,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api/forms/{from_id}": {
-            "get": {
-                "description": "Возвращает подробную информацию о форме и комментарий по коду",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Формы"
-                ],
-                "summary": "Получить одну форму",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id формы",
-                        "name": "form_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/schemes.FormResponse"
-                        }
                     }
                 }
             }
@@ -430,8 +431,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/schemes.AddToFormResp"
                         }
@@ -449,7 +450,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Авторизация"
+                    "Авторизация и аутентификация"
                 ],
                 "summary": "Авторизация",
                 "parameters": [
@@ -467,25 +468,22 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/schemes.SwaggerLoginResp"
+                            "$ref": "#/definitions/schemes.AuthResp"
                         }
                     }
                 }
             }
         },
-        "/api/user/logout": {
-            "post": {
-                "description": "Выход из аккаунта",
+        "/api/user/loguot": {
+            "get": {
+                "description": "Осуществляет выход из аккаунта",
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
-                    "Авторизация"
+                    "Авторизация и аутентификация"
                 ],
-                "summary": "Выйти из аккаунта",
+                "summary": "Выход из аккаунта",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -499,11 +497,8 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
-                    "Авторизация"
+                    "Авторизация и аутентификация"
                 ],
                 "summary": "Регистрация",
                 "parameters": [
@@ -519,25 +514,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/schemes.RegisterResp"
-                        }
+                        "description": "OK"
                     }
                 }
             }
         }
     },
     "definitions": {
-        "app.SwaggerUpdateFormRequest": {
-            "type": "object",
-            "properties": {
-                "comments": {
-                    "description": "изменить",
-                    "type": "string"
-                }
-            }
-        },
         "ds.Language": {
             "type": "object",
             "required": [
@@ -586,20 +569,61 @@ const docTemplate = `{
                 }
             }
         },
-        "schemes.AllLanguagesResponse": {
+        "schemes.AuthResp": {
             "type": "object",
             "properties": {
-                "languages": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ds.Language"
-                    }
+                "access_token": {
+                    "type": "string"
+                },
+                "token_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemes.ChangeGithubRequest": {
+            "type": "object",
+            "required": [
+                "formId",
+                "github"
+            ],
+            "properties": {
+                "formId": {
+                    "type": "string"
+                },
+                "github": {
+                    "type": "string",
+                    "maxLength": 50
+                }
+            }
+        },
+        "schemes.CodeOutput": {
+            "type": "object",
+            "properties": {
+                "form_id": {
+                    "type": "string"
+                },
+                "github": {
+                    "type": "string"
+                },
+                "language_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemes.CodeResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/schemes.CodeOutput"
                 }
             }
         },
         "schemes.FormOutput": {
             "type": "object",
             "properties": {
+                "autotest": {
+                    "type": "string"
+                },
                 "comments": {
                     "type": "string"
                 },
@@ -613,9 +637,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "moderator": {
-                    "type": "string"
-                },
-                "sending_status": {
                     "type": "string"
                 },
                 "status": {
@@ -643,22 +664,11 @@ const docTemplate = `{
                 }
             }
         },
-        "schemes.FormShort": {
-            "type": "object",
-            "properties": {
-                "language_count": {
-                    "type": "integer"
-                },
-                "uuid": {
-                    "type": "string"
-                }
-            }
-        },
         "schemes.GetAllLanguagesResponse": {
             "type": "object",
             "properties": {
                 "draft_form": {
-                    "$ref": "#/definitions/schemes.FormShort"
+                    "type": "string"
                 },
                 "languages": {
                     "type": "array",
@@ -702,33 +712,15 @@ const docTemplate = `{
                 }
             }
         },
-        "schemes.RegisterResp": {
+        "schemes.UpdateFormRequest": {
             "type": "object",
+            "required": [
+                "comments"
+            ],
             "properties": {
-                "ok": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "schemes.SwaggerLoginResp": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "expires_in": {
-                    "type": "integer"
-                },
-                "token_type": {
-                    "type": "string"
-                }
-            }
-        },
-        "schemes.UpdateFormResponse": {
-            "type": "object",
-            "properties": {
-                "forms": {
-                    "$ref": "#/definitions/schemes.FormOutput"
+                "comments": {
+                    "type": "string",
+                    "maxLength": 300
                 }
             }
         }

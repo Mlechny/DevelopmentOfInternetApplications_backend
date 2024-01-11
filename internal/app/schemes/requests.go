@@ -16,7 +16,7 @@ type GetAllLanguagesRequest struct {
 
 type AddLanguageRequest struct {
 	ds.Language
-	Image *multipart.FileHeader `form:"image" json:"image" binding:"required"`
+	Image *multipart.FileHeader `form:"image" json:"image"`
 }
 
 type ChangeLanguageRequest struct {
@@ -26,17 +26,20 @@ type ChangeLanguageRequest struct {
 	Task        *string               `form:"task" json:"task" binding:"omitempty,max=30"`
 	Image       *multipart.FileHeader `form:"image" json:"image"`
 	Description *string               `form:"description" json:"description" binding:"omitempty,max=1000"`
-	Deadline    *time.Time            `form:"deadline" json:"deadline" time_format:"2006-01-02"`
+}
+
+type ChangeGithubRequest struct {
+	FormId string `uri:"id" binding:"required,uuid"`
+	Github string `form:"github" json:"github" binding:"required,max=50"`
 }
 
 type AddToFormRequest struct {
 	LanguageId string `uri:"id" binding:"required,uuid"`
-	Github     string `form:"github" json:"github" binding:"omitempty,max=50"`
 }
 
 type GetAllFormsRequest struct {
-	FormationDateStart *time.Time `form:"formation_date_start" json:"formation_date_start" time_format:"2006-01-02 15:04:05"`
-	FormationDateEnd   *time.Time `form:"formation_date_end" json:"formation_date_end" time_format:"2006-01-02 15:04:05"`
+	FormationDateStart *time.Time `form:"formation_date_start" json:"formation_date_start" time_format:"2006-01-02 15:04"`
+	FormationDateEnd   *time.Time `form:"formation_date_end" json:"formation_date_end" time_format:"2006-01-02 15:04"`
 	Status             string     `form:"status"`
 }
 
@@ -73,6 +76,6 @@ type TestingReq struct {
 	URI struct {
 		FormId string `uri:"id" binding:"required,uuid"`
 	}
-	TestingStatus bool   `form:"testing_status" binding:"required"`
-	Token         string `form:"token" binding:"required"`
+	TestingStatus *bool  `json:"sending_status" form:"testing_status" binding:"required"`
+	Token         string `json:"token" form:"token" binding:"required"`
 }

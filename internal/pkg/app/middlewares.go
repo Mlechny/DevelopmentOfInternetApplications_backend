@@ -20,6 +20,7 @@ func (app *Application) WithAuthCheck(assignedRoles ...role.Role) func(ctx *gin.
 		if !strings.HasPrefix(jwtStr, jwtPrefix) {
 			for _, oneOfAssignedRole := range assignedRoles {
 				if role.NotAuthorized == oneOfAssignedRole {
+					c.Set("userRole", role.NotAuthorized)
 					return
 				}
 			}
@@ -27,7 +28,6 @@ func (app *Application) WithAuthCheck(assignedRoles ...role.Role) func(ctx *gin.
 			return
 		}
 
-		// отрезаем префикс
 		jwtStr = jwtStr[len(jwtPrefix):]
 
 		err := app.redisClient.CheckJWTInBlacklist(c.Request.Context(), jwtStr)

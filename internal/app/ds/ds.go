@@ -6,10 +6,10 @@ import (
 )
 
 const StatusDraft string = "черновик"
-const StatusFormed string = "сформирован"
-const StatusCompleted string = "завершён"
-const StatusRejected string = "отклонён"
-const StatusDeleted string = "удалён"
+const StatusFormed string = "сформирована"
+const StatusCompleted string = "завершена"
+const StatusRejected string = "отклонена"
+const StatusDeleted string = "удалена"
 
 const TestingSuccess string = "код верен, ошибки не обнаружены"
 const TestingFailure string = "код неверен, обнаружены ошибки"
@@ -20,7 +20,6 @@ type User struct {
 	Role     role.Role
 	Login    string `gorm:"size:30;not null" json:"login"`
 	Password string `gorm:"size:40;not null" json:"-"`
-	// The SHA-1 hash is 20 bytes. When encoded in hexadecimal, each byte is represented by two characters. Therefore, the resulting hash string will be 40 characters long
 }
 
 type Language struct {
@@ -49,9 +48,9 @@ type Form struct {
 }
 
 type Code struct {
-	LanguageId string `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"language_id"`
-	FormId     string `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"form_id"`
-	Github     string `gorm:"size:50"`
+	LanguageId string  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"language_id"`
+	FormId     string  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"form_id"`
+	Github     *string `gorm:"size:50"`
 
 	Language *Language `gorm:"foreignKey:LanguageId" json:"language"`
 	Form     *Form     `gorm:"foreignKey:FormId" json:"form"`

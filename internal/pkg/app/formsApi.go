@@ -29,7 +29,6 @@ func (app *Application) GetAllForms(c *gin.Context) {
 
 	userId := getUserId(c)
 	userRole := getUserRole(c)
-	fmt.Println(userId, userRole)
 	var forms []ds.Form
 	if userRole == role.Student {
 		forms, err = app.repo.GetAllForms(&userId, request.FormationDateStart, request.FormationDateEnd, request.Status)
@@ -50,11 +49,11 @@ func (app *Application) GetAllForms(c *gin.Context) {
 
 // @Summary		Получить одну форму
 // @Tags		Формы
-// @Description	Возвращает подробную информацию о форме и комментарий по коду
+// @Description	Возвращает подробную информацию о форме и комментарий
 // @Produce		json
-// @Param		form_id path string true "id формы"
+// @Param		id path string true "id формы"
 // @Success		200 {object} schemes.FormResponse
-// @Router		/api/forms/{from_id} [get]
+// @Router		/api/forms/{id} [get]
 func (app *Application) GetForm(c *gin.Context) {
 	var request schemes.FormRequest
 	var err error
@@ -88,19 +87,17 @@ func (app *Application) GetForm(c *gin.Context) {
 	c.JSON(http.StatusOK, schemes.FormResponse{Form: schemes.ConvertForm(form), Languages: languages})
 }
 
-type SwaggerUpdateFormRequest struct {
-	Comments string `json:"comments"` //изменить
-}
+/*type SwaggerUpdateFormRequest struct {
+	Comments string `json:"comments"`
+}*/
 
-// @Summary		Указать комментарий к форме
+// @Summary		Указать комментарий в форме
 // @Tags		Формы
-// @Description	Позволяет изменить комментарий по коду и возвращает обновлённые данные
+// @Description	Позволяет изменить комментарий в черновой форме и возвращает обновлённые данные
 // @Access		json
-// @Produce		json
-// @Param		form_id path string true "id формы"
-// @Param		comments body SwaggerUpdateFormRequest true "Комментарий"
-// @Success		200 {object} schemes.UpdateFormResponse
-// @Router		/api/forms/{form_id} [put]
+// @Param		comments body schemes.UpdateFormRequest true "Комментарии"
+// @Success		200
+// @Router		/api/forms [put]
 func (app *Application) UpdateForm(c *gin.Context) {
 	var request schemes.UpdateFormRequest
 	var err error
@@ -108,7 +105,6 @@ func (app *Application) UpdateForm(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	// Получить черновую заявку
 	var form *ds.Form
 
 	userId := getUserId(c)
@@ -122,22 +118,20 @@ func (app *Application) UpdateForm(c *gin.Context) {
 		return
 	}
 
-	// Добавить тип
 	form.Comments = &request.Comments
 	if app.repo.SaveForm(form); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, schemes.ConvertForm(form))
+	c.Status(http.StatusOK)
 }
 
-// @Summary		Удалить форму
+// @Summary		Удалить черновую форму
 // @Tags		Формы
-// @Description	Удаляет форму по id
-// @Param		form_id path string true "id формы"
+// @Description	Удаляет черновую форму
 // @Success		200
-// @Router		/api/forms/{form_id} [delete]
+// @Router		/api/forms [delete]
 func (app *Application) DeleteForm(c *gin.Context) {
 	var err error
 	var form *ds.Form
@@ -161,14 +155,13 @@ func (app *Application) DeleteForm(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// @Summary		Удалить язык программирования из формы
+// @Summary		Удалить язык программирования из черновой формы
 // @Tags		Формы
-// @Description	Удалить язык программиования из формы
+// @Description	Удалить язык программиования из черновой формы
 // @Produce		json
-// @Param		from_id path string true "id формы"
-// @Param		language_id path string true "id языка программирования"
-// @Success		200 {object} schemes.AllLanguagesResponse
-// @Router		/api/forms/{form_id}/delete_language/{language_id} [delete]
+// @Param		id path string true "id языка программирования"
+// @Success		200
+// @Router		/api/forms/delete_language/{id} [delete]
 func (app *Application) DeleteFromForm(c *gin.Context) {
 	var request schemes.DeleteFromFormRequest
 	var err error
@@ -193,19 +186,13 @@ func (app *Application) DeleteFromForm(c *gin.Context) {
 		return
 	}
 
-	languages, err := app.repo.GetCode(form.UUID)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, schemes.AllLanguagesResponse{Languages: languages})
+	c.Status(http.StatusOK)
 }
 
 // @Summary		Сформировать форму
 // @Tags		Формы
 // @Description	Сформировать или удалить форму пользователем
-// @Success		200 {object} schemes.FormOutput
+// @Success		200
 // @Router		/api/forms/user_confirm [put]
 func (app *Application) UserConfirm(c *gin.Context) {
 	userId := getUserId(c)
@@ -218,14 +205,10 @@ func (app *Application) UserConfirm(c *gin.Context) {
 		c.AbortWithError(http.StatusNotFound, fmt.Errorf("форма не найдена"))
 		return
 	}
-	if form.Status != ds.StatusDraft {
-		c.AbortWithError(http.StatusMethodNotAllowed, fmt.Errorf("нельзя сформировать форму со статусом %s", form.Status))
-		return
-	}
-	/*if err := testingRequest(form.UUID); err != nil {
+	if err := testingRequest(form.UUID); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf(`testing service is unavailable: {%s}`, err))
 		return
-	}*/
+	}
 
 	testingStatus := ds.TestingStart
 	form.Autotest = &testingStatus
@@ -237,16 +220,16 @@ func (app *Application) UserConfirm(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, schemes.ConvertForm(form))
+	c.Status(http.StatusOK)
 }
 
 // @Summary		Подтвердить/отклонить форму
 // @Tags		Формы
-// @Description	Подтвердить или отменить форму модератором
-// @Param		form_id path string true "id формы"
+// @Description	Подтвердить или отклонить форму модератором
+// @Param		id path string true "id формы"
 // @Param		confirm body boolean true "подтвердить"
 // @Success		200
-// @Router		/api/forms/{form_id}/moderator_confirm [put]
+// @Router		/api/forms/{id}/moderator_confirm [put]
 func (app *Application) ModeratorConfirm(c *gin.Context) {
 	var request schemes.ModeratorConfirmRequest
 	if err := c.ShouldBindUri(&request.URI); err != nil {
@@ -275,12 +258,11 @@ func (app *Application) ModeratorConfirm(c *gin.Context) {
 
 	if *request.Confirm {
 		form.Status = ds.StatusCompleted
-		now := time.Now()
-		form.CompletionDate = &now
-
 	} else {
 		form.Status = ds.StatusRejected
 	}
+	now := time.Now()
+	form.CompletionDate = &now
 	moderator, err := app.repo.GetUserById(userId)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -292,10 +274,10 @@ func (app *Application) ModeratorConfirm(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, schemes.ConvertForm(form))
+	c.Status(http.StatusOK)
 }
 
-func (app *Application) Checking(c *gin.Context) {
+func (app *Application) Testing(c *gin.Context) {
 	var request schemes.TestingReq
 	if err := c.ShouldBindUri(&request.URI); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
@@ -320,13 +302,9 @@ func (app *Application) Checking(c *gin.Context) {
 		c.AbortWithError(http.StatusNotFound, fmt.Errorf("форма не найдена"))
 		return
 	}
-	if form.Status != ds.StatusFormed || *form.Autotest != ds.TestingStart {
-		c.AbortWithStatus(http.StatusMethodNotAllowed)
-		return
-	}
 
 	var testingStatus string
-	if request.TestingStatus {
+	if *request.TestingStatus {
 		testingStatus = ds.TestingSuccess
 	} else {
 		testingStatus = ds.TestingFailure
@@ -338,4 +316,60 @@ func (app *Application) Checking(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+// @Summary		Указать ссылку на гитхаб
+// @Tags		Коды
+// @Description	Позволяет изменить ссылку на гитхаб в таблице м-м и возвращает обновленные данные
+// @Access      json
+// @Produce     json
+// @Param		id path string true "id формы"
+// @Param		github body schemes.ChangeGithubRequest true "Гитхаб"
+// @Success		200 {object} schemes.CodeResponse
+// @Router		/api/forms/{id}/change_github [put]
+func (app *Application) ChangeGithub(c *gin.Context) {
+	var request schemes.ChangeGithubRequest
+
+	if err := c.ShouldBindUri(&request); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	if err := c.ShouldBind(&request); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	userId := getUserId(c)
+	userRole := getUserRole(c)
+	fmt.Println(userId, userRole)
+
+	code, err := app.repo.GetCodeByFormId(request.FormId)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	form, err := app.repo.GetFormById(code.FormId, nil)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if form == nil {
+		c.AbortWithError(http.StatusNotFound, fmt.Errorf("форма не найдена"))
+		return
+	}
+
+	if form.StudentId != userId {
+		c.AbortWithError(http.StatusForbidden, fmt.Errorf("изменить поле может только создатель формы"))
+		return
+	}
+
+	code.Github = &request.Github
+
+	if err := app.repo.SaveCode(code); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, schemes.CodeResponse{Code: schemes.ConvertCode(code)})
 }

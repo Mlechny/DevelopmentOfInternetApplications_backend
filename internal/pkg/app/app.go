@@ -44,7 +44,7 @@ func (app *Application) Run() {
 			res.DELETE("/:id", app.WithAuthCheck(role.Moderator), app.DeleteLanguage)                              // Удаление
 			res.PUT("/:id", app.WithAuthCheck(role.Moderator), app.ChangeLanguage)                                 // Изменение
 			res.POST("", app.WithAuthCheck(role.Moderator), app.AddLanguage)                                       // Добавление
-			res.POST("/:id/form", app.WithAuthCheck(role.Student, role.Moderator), app.AddToForm)                  // Добавление в заявку
+			res.POST("/:id/add_to_form", app.WithAuthCheck(role.Student, role.Moderator), app.AddToForm)           // Добавление в заявку
 		}
 
 		// Заявки - формы
@@ -52,20 +52,21 @@ func (app *Application) Run() {
 		{
 			n.GET("/", app.WithAuthCheck(role.Student, role.Moderator), app.GetAllForms)                          // Список (отфильтровать по дате формирования и статусу)
 			n.GET("/:id", app.WithAuthCheck(role.Student, role.Moderator), app.GetForm)                           // Одна заявка
-			n.PUT("", app.WithAuthCheck(role.Student, role.Moderator), app.UpdateForm)                            // Изменение (добавление транспорта)
+			n.PUT("", app.WithAuthCheck(role.Student, role.Moderator), app.UpdateForm)                            // Изменение (добавление комментариев)
 			n.DELETE("", app.WithAuthCheck(role.Student, role.Moderator), app.DeleteForm)                         // Удаление
 			n.DELETE("/delete_language/:id", app.WithAuthCheck(role.Student, role.Moderator), app.DeleteFromForm) // Изменеие (удаление услуг)
+			n.PUT("/:id/change_github", app.WithAuthCheck(role.Student), app.ChangeGithub)                        //Изменение (добавление ссылки на гитхаб в м-м)
 			n.PUT("/user_confirm", app.WithAuthCheck(role.Student, role.Moderator), app.UserConfirm)              // Сформировать создателем
-			n.PUT("/:id/moderator_confirm", app.WithAuthCheck(role.Moderator), app.ModeratorConfirm)              // Завершить отклонить модератором
-			n.PUT("/:id/test", app.Checking)
+			n.PUT("/:id/moderator_confirm", app.WithAuthCheck(role.Moderator), app.ModeratorConfirm)              // Завершить/отклонить модератором
+			n.PUT("/:id/testing", app.Testing)                                                                    //Добавление результата автотестирования (запрос к асинхронному сервису)
 		}
 
-		// Пользователи (авторизация)
+		// Пользователи (авторизация и аутентификация)
 		u := api.Group("/user")
 		{
-			u.POST("/sign_up", app.Register)
-			u.POST("/login", app.Login)
-			u.POST("/logout", app.Logout)
+			u.POST("/sign_up", app.Register) //Авторизация
+			u.POST("/login", app.Login)      //Регистрация
+			u.GET("/logout", app.Logout)     //Выход из аккаунта
 		}
 
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -81,7 +82,7 @@ func (app *Application) Run() {
 
 func New() (*Application, error) {
 	var err error
-	loc, _ := time.LoadLocation("UTC")
+	loc, _ := time.LoadLocation("Europe/Moscow")
 	time.Local = loc
 	app := Application{}
 	app.config, err = config.NewConfig()

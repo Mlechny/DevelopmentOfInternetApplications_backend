@@ -27,23 +27,16 @@ func (app *Application) GetAllLanguages(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	var draftForm *ds.Form = nil
-	if userId, exists := c.Get("userId"); exists {
-		draftForm, err = app.repo.GetDraftForm(userId.(string))
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-	}
 	response := schemes.GetAllLanguagesResponse{DraftForm: nil, Languages: languages}
-	if draftForm != nil {
-		response.DraftForm = &schemes.FormShort{UUID: draftForm.UUID}
-		languagesCount, err := app.repo.CountLanguages(draftForm.UUID)
+	if userId, exists := c.Get("userId"); exists {
+		draftForm, err := app.repo.GetDraftForm(userId.(string))
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
-		response.DraftForm.LanguageCount = int(languagesCount)
+		if draftForm != nil {
+			response.DraftForm = &draftForm.UUID
+		}
 	}
 	c.JSON(http.StatusOK, response)
 }
@@ -131,7 +124,7 @@ func (app *Application) AddLanguage(c *gin.Context) {
 		return
 	}
 
-	language := request.Language
+	language := request.Language ///?
 	if err := app.repo.AddLanguage(&language); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -150,7 +143,7 @@ func (app *Application) AddLanguage(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	c.JSON(http.StatusCreated, language.UUID)
 }
 
 // @Summary		Изменить язык программирования
@@ -218,7 +211,7 @@ func (app *Application) ChangeLanguage(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, language)
+	c.Status(http.StatusOK)
 }
 
 // @Summary		Добавить в форму
@@ -226,7 +219,7 @@ func (app *Application) ChangeLanguage(c *gin.Context) {
 // @Description	Добавить выбранный язык программирования в черновик формы
 // @Produce		json
 // @Param		id path string true "id языка программирования"
-// @Success		200 {object} schemes.AddToFormResp
+// @Success		201 {object} schemes.AddToFormResp
 // @Router		/api/languages/{id}/add_to_form [post]
 func (app *Application) AddToForm(c *gin.Context) {
 	var request schemes.AddToFormRequest
@@ -266,11 +259,5 @@ func (app *Application) AddToForm(c *gin.Context) {
 		return
 	}
 
-	languagesCount, err := app.repo.CountLanguages(form.UUID)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, schemes.AddToFormResp{LanguagesCount: languagesCount})
+	c.Status(http.StatusOK)
 }

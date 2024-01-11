@@ -63,7 +63,7 @@ func generateHashString(s string) string {
 }
 
 func testingRequest(form_id string) error {
-	url := "http://127.0.0.1:8000/api/checking/"
+	url := "http://127.0.0.1:8000/api/testing/"
 	payload := fmt.Sprintf(`{"form_id": "%s"}`, form_id)
 
 	resp, err := http.Post(url, "application/json", bytes.NewBufferString(payload))

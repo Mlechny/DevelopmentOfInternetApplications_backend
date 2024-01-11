@@ -1,10 +1,4 @@
 definitions:
-  app.SwaggerUpdateFormRequest:
-    properties:
-      comments:
-        description: изменить
-        type: string
-    type: object
   ds.Language:
     properties:
       description:
@@ -37,15 +31,42 @@ definitions:
           $ref: '#/definitions/schemes.FormOutput'
         type: array
     type: object
-  schemes.AllLanguagesResponse:
+  schemes.AuthResp:
     properties:
-      languages:
-        items:
-          $ref: '#/definitions/ds.Language'
-        type: array
+      access_token:
+        type: string
+      token_type:
+        type: string
+    type: object
+  schemes.ChangeGithubRequest:
+    properties:
+      formId:
+        type: string
+      github:
+        maxLength: 50
+        type: string
+    required:
+    - formId
+    - github
+    type: object
+  schemes.CodeOutput:
+    properties:
+      form_id:
+        type: string
+      github:
+        type: string
+      language_id:
+        type: string
+    type: object
+  schemes.CodeResponse:
+    properties:
+      code:
+        $ref: '#/definitions/schemes.CodeOutput'
     type: object
   schemes.FormOutput:
     properties:
+      autotest:
+        type: string
       comments:
         type: string
       completion_date:
@@ -55,8 +76,6 @@ definitions:
       formation_date:
         type: string
       moderator:
-        type: string
-      sending_status:
         type: string
       status:
         type: string
@@ -74,17 +93,10 @@ definitions:
           $ref: '#/definitions/ds.Language'
         type: array
     type: object
-  schemes.FormShort:
-    properties:
-      language_count:
-        type: integer
-      uuid:
-        type: string
-    type: object
   schemes.GetAllLanguagesResponse:
     properties:
       draft_form:
-        $ref: '#/definitions/schemes.FormShort'
+        type: string
       languages:
         items:
           $ref: '#/definitions/ds.Language'
@@ -114,29 +126,26 @@ definitions:
     - login
     - password
     type: object
-  schemes.RegisterResp:
+  schemes.UpdateFormRequest:
     properties:
-      ok:
-        type: boolean
-    type: object
-  schemes.SwaggerLoginResp:
-    properties:
-      access_token:
+      comments:
+        maxLength: 300
         type: string
-      expires_in:
-        type: integer
-      token_type:
-        type: string
-    type: object
-  schemes.UpdateFormResponse:
-    properties:
-      forms:
-        $ref: '#/definitions/schemes.FormOutput'
+    required:
+    - comments
     type: object
 info:
   contact: {}
 paths:
   /api/forms:
+    delete:
+      description: Удаляет черновую форму
+      responses:
+        "200":
+          description: OK
+      summary: Удалить черновую форму
+      tags:
+      - Формы
     get:
       description: Возвращает все формы с фильтрацией по статусу и дате формирования
       parameters:
@@ -162,58 +171,29 @@ paths:
       summary: Получить все формы
       tags:
       - Формы
-  /api/forms/{form_id}:
-    delete:
-      description: Удаляет форму по id
-      parameters:
-      - description: id формы
-        in: path
-        name: form_id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Удалить форму
-      tags:
-      - Формы
     put:
-      description: Позволяет изменить комментарий по коду и возвращает обновлённые
+      description: Позволяет изменить комментарий в черновой форме и возвращает обновлённые
         данные
       parameters:
-      - description: id формы
-        in: path
-        name: form_id
-        required: true
-        type: string
-      - description: Комментарий
+      - description: Комментарии
         in: body
         name: comments
         required: true
         schema:
-          $ref: '#/definitions/app.SwaggerUpdateFormRequest'
-      produces:
-      - application/json
+          $ref: '#/definitions/schemes.UpdateFormRequest'
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/schemes.UpdateFormResponse'
-      summary: Указать комментарий к форме
+      summary: Указать комментарий в форме
       tags:
       - Формы
-  /api/forms/{form_id}/delete_language/{language_id}:
-    delete:
-      description: Удалить язык программиования из формы
+  /api/forms/{id}:
+    get:
+      description: Возвращает подробную информацию о форме и комментарий
       parameters:
       - description: id формы
         in: path
-        name: from_id
-        required: true
-        type: string
-      - description: id языка программирования
-        in: path
-        name: language_id
+        name: id
         required: true
         type: string
       produces:
@@ -222,17 +202,43 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/schemes.AllLanguagesResponse'
-      summary: Удалить язык программирования из формы
+            $ref: '#/definitions/schemes.FormResponse'
+      summary: Получить одну форму
       tags:
       - Формы
-  /api/forms/{form_id}/moderator_confirm:
+  /api/forms/{id}/change_github:
     put:
-      description: Подтвердить или отменить форму модератором
+      description: Позволяет изменить ссылку на гитхаб в таблице м-м и возвращает
+        обновленные данные
       parameters:
       - description: id формы
         in: path
-        name: form_id
+        name: id
+        required: true
+        type: string
+      - description: Гитхаб
+        in: body
+        name: github
+        required: true
+        schema:
+          $ref: '#/definitions/schemes.ChangeGithubRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemes.CodeResponse'
+      summary: Указать ссылку на гитхаб
+      tags:
+      - Коды
+  /api/forms/{id}/moderator_confirm:
+    put:
+      description: Подтвердить или отклонить форму модератором
+      parameters:
+      - description: id формы
+        in: path
+        name: id
         required: true
         type: string
       - description: подтвердить
@@ -247,13 +253,13 @@ paths:
       summary: Подтвердить/отклонить форму
       tags:
       - Формы
-  /api/forms/{from_id}:
-    get:
-      description: Возвращает подробную информацию о форме и комментарий по коду
+  /api/forms/delete_language/{id}:
+    delete:
+      description: Удалить язык программиования из черновой формы
       parameters:
-      - description: id формы
+      - description: id языка программирования
         in: path
-        name: form_id
+        name: id
         required: true
         type: string
       produces:
@@ -261,9 +267,7 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/schemes.FormResponse'
-      summary: Получить одну форму
+      summary: Удалить язык программирования из черновой формы
       tags:
       - Формы
   /api/forms/user_confirm:
@@ -272,8 +276,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/schemes.FormOutput'
       summary: Сформировать форму
       tags:
       - Формы
@@ -412,8 +414,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/schemes.AddToFormResp'
       summary: Добавить в форму
@@ -438,23 +440,21 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/schemes.SwaggerLoginResp'
+            $ref: '#/definitions/schemes.AuthResp'
       summary: Авторизация
       tags:
-      - Авторизация
-  /api/user/logout:
-    post:
+      - Авторизация и аутентификация
+  /api/user/loguot:
+    get:
       consumes:
       - application/json
-      description: Выход из аккаунта
-      produces:
-      - application/json
+      description: Осуществляет выход из аккаунта
       responses:
         "200":
           description: OK
-      summary: Выйти из аккаунта
+      summary: Выход из аккаунта
       tags:
-      - Авторизация
+      - Авторизация и аутентификация
   /api/user/sign_up:
     post:
       consumes:
@@ -467,14 +467,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/schemes.RegisterReq'
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/schemes.RegisterResp'
       summary: Регистрация
       tags:
-      - Авторизация
+      - Авторизация и аутентификация
 swagger: "2.0"
