@@ -6,6 +6,7 @@ import (
 
 type User struct {
 	UserId   string `gorm:"primary_key"`
+	Name      string `gorm:"size:50;not null"`
 	Login    string `gorm:"size:30;not null"`
 	Password string `gorm:"size:40;not null"`
 	Moderator bool  `gorm:"not null"`
