@@ -11,10 +11,6 @@ const StatusCompleted string = "завершена"
 const StatusRejected string = "отклонена"
 const StatusDeleted string = "удалена"
 
-const TestingSuccess string = "код верен, ошибки не обнаружены"
-const TestingFailure string = "код неверен, обнаружены ошибки"
-const TestingStart string = "проверка начата"
-
 type User struct {
 	UUID     string `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"-"`
 	Role     role.Role
@@ -41,7 +37,6 @@ type Form struct {
 	StudentId      string     `gorm:"not null"`
 	Status         string     `gorm:"size:30;not null"`
 	Comments       *string    `gorm:"size:300"`
-	Autotest       *string    `gorm:"size:50"`
 
 	Moderator *User
 	Student   User

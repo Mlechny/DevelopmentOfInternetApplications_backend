@@ -205,13 +205,7 @@ func (app *Application) UserConfirm(c *gin.Context) {
 		c.AbortWithError(http.StatusNotFound, fmt.Errorf("форма не найдена"))
 		return
 	}
-	if err := testingRequest(form.UUID); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf(`testing service is unavailable: {%s}`, err))
-		return
-	}
 
-	testingStatus := ds.TestingStart
-	form.Autotest = &testingStatus
 	form.Status = ds.StatusFormed
 	now := time.Now()
 	form.FormationDate = &now
@@ -269,47 +263,6 @@ func (app *Application) ModeratorConfirm(c *gin.Context) {
 		return
 	}
 	form.Moderator = moderator
-
-	if err := app.repo.SaveForm(form); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	c.Status(http.StatusOK)
-}
-
-func (app *Application) Testing(c *gin.Context) {
-	var request schemes.TestingReq
-	if err := c.ShouldBindUri(&request.URI); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-	if err := c.ShouldBind(&request); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	if request.Token != app.config.Token {
-		c.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	form, err := app.repo.GetFormById(request.URI.FormId, nil)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if form == nil {
-		c.AbortWithError(http.StatusNotFound, fmt.Errorf("форма не найдена"))
-		return
-	}
-
-	var testingStatus string
-	if *request.TestingStatus {
-		testingStatus = ds.TestingSuccess
-	} else {
-		testingStatus = ds.TestingFailure
-	}
-	form.Autotest = &testingStatus
 
 	if err := app.repo.SaveForm(form); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)

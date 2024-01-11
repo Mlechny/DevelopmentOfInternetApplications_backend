@@ -57,8 +57,7 @@ func (app *Application) Run() {
 			n.DELETE("/delete_language/:id", app.WithAuthCheck(role.Student, role.Moderator), app.DeleteFromForm) // Изменеие (удаление услуг)
 			n.PUT("/:id/change_github", app.WithAuthCheck(role.Student), app.ChangeGithub)                        //Изменение (добавление ссылки на гитхаб в м-м)
 			n.PUT("/user_confirm", app.WithAuthCheck(role.Student, role.Moderator), app.UserConfirm)              // Сформировать создателем
-			n.PUT("/:id/moderator_confirm", app.WithAuthCheck(role.Moderator), app.ModeratorConfirm)              // Завершить/отклонить модератором
-			n.PUT("/:id/testing", app.Testing)                                                                    //Добавление результата автотестирования (запрос к асинхронному сервису)
+			n.PUT("/:id/moderator_confirm", app.WithAuthCheck(role.Moderator), app.ModeratorConfirm)              // Завершить/отклонить модератором                                                                 //Добавление результата автотестирования (запрос к асинхронному сервису)
 		}
 
 		// Пользователи (авторизация и аутентификация)
